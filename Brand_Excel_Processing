@@ -1,0 +1,32 @@
+import openpyxl
+import re
+
+# 读取Excel文件
+excel_path = "/Users/jasmine/Desktop/抖音品牌/品牌详情-品牌商品-2023-01-13-2023-07-10的副本.xlsx"
+wb = openpyxl.load_workbook(excel_path)
+sheet = wb.active
+
+# 获取商品链接所在列的索引（是第11列）
+link_column_index = 11
+
+# 定义正则表达式模式
+pattern = r"id=(\d+)"
+
+# 遍历每一行，提取商品ID并生成灰豚产品链接
+for row_index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):  # 从第2行开始遍历，跳过标题行
+    link = str(row[link_column_index - 1])  # 列索引从0开始，需要减去1，并将数据转换为字符串类型
+    if not link:  # 如果链接为空，则跳过该行
+        continue
+
+    match = re.search(pattern, link)
+    if match:
+        product_id = match.group(1)
+        product_link = f"https://dy.huitun.com/app/#/app/goods/goods_search/goods_detail?pId={product_id}"
+        # 将商品ID和灰豚产品链接写入相应的列（假设是第B列和第C列）
+        sheet.cell(row=row_index, column=13).value = product_id
+        sheet.cell(row=row_index, column=14).value = product_link
+
+# 保存修改后的Excel文件
+wb.save(excel_path)
+
+print("处理完成！")
